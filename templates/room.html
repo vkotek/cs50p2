@@ -6,79 +6,39 @@
 {% endblock %}
 
 {% block sidebar %}
-  <ul class="rooms">
-    <h3>Rooms:</h3>
-  {% if rooms %}
-    {% for room in rooms %}
-    <li>
-      <a href="{{ url_for('chatroom_single', room=room) }}">#{{ room }}</a>
-    </li>
-    {% endfor %}
-  {% endif %}
-    <li>
-      <form method="GET" action="">
-        #<input name="room" type="text" placeholder="New room..">
-      </form>
-    </li>
+  <h3>Rooms:</h3>
+  <ul id="rooms">
+  </ul>
+    <form id="create-room" method="GET" action="">
+      #<input id="create-room-name" name="room" type="text" placeholder="Create room.."autocomplete="off" required="required">
+    </form>
+  <hr>
+  <h3>Participants:</h3>
+  <ul id="participants">
+  </ul>
+  <hr>
+  <h3 hidden>Settings</h3>
+  <ul id="settings" hidden>
+    <li>User: </li>
+    <li>Change username</li>
+    <li>Active users: </li>
   </ul>
 {% endblock %}
 
 {% block heading %}
-  {% if room %}
-    #{{ room.name }}
-  {% else %}
-    Please join or create a channel!
-  {% endif %}
+    Loading..
 {% endblock %}
 
 {% block body %}
-  {% if room %}
   <div class="chat">
     <div id="message_holder" class="message_holder">
-      {% for msg in rooms[room.name]['messages'] %}
-        <div class="{{ 'me' if msg.user == user.name }}"><span class="timestamp">[{{ msg.timestamp }}]</span><b>{{ msg.user }}</b>{{ msg.message }}</div>
-      {% endfor %}
+      <ul id="messages">
+      </ul>
     </div>
-    <form method="POST" action="" name="chat" autocomplete="off"><input name="message" class="message" type="text" placeholder="Message.." required="required"></form>
+    <form method="POST" action="" id="chat" name="chat" autocomplete="off"><input id="message" name="message" class="message" type="text" placeholder="Message.." required="required"></form>
   </div>
-  {% endif %}
 {% endblock %}
 
 {% block footer %}
-  <script type="text/javascript" charset="utf-8">
-      var socket = io();
-      socket.on('connect', function() {
-          socket.emit( 'join' , {
-            user: '{{ user.name }}',
-            room: '{{ room.name }}'
-          })
-          var form = $( "form[name='chat']" ).on( 'submit', function( e ) {
-            e.preventDefault()
-            let message = $( 'input.message').val()
-            socket.emit( 'json', {
-              user: '{{ user.name }}',
-              room: '{{ room.name }}',
-              message: message
-            })
-            $( 'input.message' ).val( '' ).focus()
-          })
-          updateScroll();
-      });
-  socket.on( 'response', function( msg ) {
-    console.log( msg )
-    if( typeof msg.user !== 'undefined' ) {
-
-      let itsMe = msg.user == '{{user.name}}' ? "me" : "";
-
-      $( 'div.message_holder' ).append('<div class="'+itsMe+'"><span class="timestamp">['+msg.timestamp+']</span><b>'+msg.user+'</b>'+msg.message+'</div>' )
-    }
-    updateScroll();
-  })
-  </script>
-  <script>
-    function updateScroll(){
-      var element = document.getElementById("message_holder");
-      element.scrollTop = element.scrollHeight;
-    }
-  </script>
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static', filename='scripts.js') }}"></script>
 {% endblock %}
